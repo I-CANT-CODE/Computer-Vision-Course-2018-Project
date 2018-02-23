@@ -13,13 +13,13 @@ black = (0,0,0)
 
 DIM = 320
 Disp = pygame.display.set_mode((DIM,DIM))
-clock = pygame.time.Clock()
+
 
 class PongGame:
     def __init__(self, W_H, Mode):
         self.WIN_DIM = W_H
         self.PADDLE_W = 20
-        self.PADDLE_H = 50
+        self.PADDLE_H = 70
         self.BALL_DIM = 10
         self.MODE = Mode
 
@@ -43,7 +43,7 @@ class PongGame:
         self.BALL_V_Y = 2
 
         #SPEEDS
-        self.PADDLE_SPEED = 1
+        self.PADDLE_SPEED = 3
         self.INIT_BALL_SPEED = 1
         self.BALL_SPEED = self.INIT_BALL_SPEED
         self.COLLISION_MARGIN = 10
@@ -60,7 +60,7 @@ class PongGame:
 
         self.RenderFrame()
 
-    def Move(self, PADDLE_RIGHT_ACTION, PADDLE_LEFT_ACTION ):
+    def Move(self, PADDLE_LEFT_ACTION, PADDLE_RIGHT_ACTION ):
         
         if np.argmax(PADDLE_RIGHT_ACTION)==np.argmax(UP):
             self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y-self.PADDLE_SPEED
@@ -109,7 +109,7 @@ class PongGame:
             if BALL_PADDLE_LEFT_COORDINATE > self.PADDLE_H:
                 BALL_PADDLE_LEFT_COORDINATE = self.PADDLE_H
             #convert from [0,70] to [1.309,-1.309]
-            G = BALL_PADDLE_LEFT_COORDINATE/50
+            G = BALL_PADDLE_LEFT_COORDINATE/70
             BALL_PADDLE_LEFT_COORDINATE = .8*(1-G)-.8*(G)
         
             self.BALL_V_X = self.BALL_SPEED*math.cos(BALL_PADDLE_LEFT_COORDINATE)
@@ -125,7 +125,7 @@ class PongGame:
             if BALL_PADDLE_RIGHT_COORDINATE > self.PADDLE_H:
                 BALL_PADDLE_RIGHT_COORDINATE = self.PADDLE_H
             #convert from [0,70] to [1.8326,4.45059]
-            G = BALL_PADDLE_RIGHT_COORDINATE/50
+            G = BALL_PADDLE_RIGHT_COORDINATE/70
             BALL_PADDLE_RIGHT_COORDINATE = .8*(1-G)-.8*(G)
 
             
@@ -169,19 +169,19 @@ class PongGame:
         pygame.draw.rect(Disp, white, [self.BALL_X,self.BALL_Y,self.BALL_DIM,self.BALL_DIM])#draw ball
         pygame.display.update()
 
-    def Run4Frames(self, A1, A2):
+    def Run4Frames(self, AL, AR):
         IPL = self.L_POINTS;
         IPR = self.R_POINTS;
 
         if self.MODE == "location":
-            paddle_R_tracking=[0,0,0,0]
-            paddle_L_tracking=[0,0,0,0]
+            paddle_R_tracking =[0,0,0,0]
+            paddle_L_tracking =[0,0,0,0]
             ball_x_tracking = [0,0,0,0]
             ball_y_tracking = [0,0,0,0]
         
         for i in range (self.frame_skipping):
             #clock.tick(60)
-            self.Move(A1, A2)
+            self.Move(AL, AR)
             self.CheckCollisions()
             self.RenderFrame()
             if self.MODE == "location":
@@ -199,7 +199,7 @@ class PongGame:
         
 
         if self.MODE == "location":
-            return L_rew, R_rew, [paddle_R_tracking,paddle_L_tracking,ball_x_tracking,ball_y_tracking]
+            return  L_rew,R_rew, [paddle_L_tracking,paddle_R_tracking,ball_x_tracking,ball_y_tracking]
         else:
             return 1
     def QUITGAME(self):
