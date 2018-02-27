@@ -7,8 +7,8 @@ import pygame
 import matplotlib.pyplot as plt
 
 clock = pygame.time.Clock()
-
-results_file = open("./DQN_REWARDS_OVER_TIME",'w')
+fstring = input("enter a name for the reward data file:")
+results_file = open("./"+fstring,'w')
 BATCH_SIZE = 32
 ALPHA = 1e-4
 GAMMA = .99
@@ -58,8 +58,11 @@ Game.PADDLE_SPEED_R = 4
 saver = tf.train.Saver()
 session = tf.Session()
 session.run(tf.global_variables_initializer())
-if LOAD_MODEL == True:
-        saver.restore(session, 'Mult_Ag_Loc_Models')
+
+model_string = input("enter a name for the Model checkpoint files:")
+print("press down key at any time to check reward progress on graph")
+
+
 
 #initializing stuff
 AVL=AVR = [1,0,0]
@@ -118,19 +121,22 @@ while (1):
                     GRAPH_REWARDS(rewards_array)
                     
             if event.type == pygame.QUIT:#for exiting the game
-                gameExit = True
+                results_file.close()
+                Game.QUITGAME()
+                
 
         if time_step%5000 == 0:
-                
-                line = str(time_step)+','+ str(LRewSUM)+','+ str(RRewSUM)+ ','+str(NUM_ROUNDS_PLAYED-temp)+','+str(Game.L_POINTS)+','+str(Game.R_POINTS)+';'
-                saver.save(session, './DQN_model', global_step = time_step)
+                line = str(time_step)+','+ str(LRewSUM)+';'
                 rewards_array.append(LRewSUM)
-
                 print(line)
                 results_file.write(line)
                 temp = NUM_ROUNDS_PLAYED
                 LRewSUM = 0
                 RRewSUM = 0
+                
+        if time_step%100000:
+                saver.save(session, './'+model_string, global_step = time_step)
+                
                 
 
         #training time
