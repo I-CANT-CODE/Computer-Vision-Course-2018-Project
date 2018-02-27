@@ -141,7 +141,7 @@ while (1):
         
         
         if (time_step>1000)&(time_step%4==0):
-                print(training)
+                
                    
                 #train
                 batch = random.sample(training_data, BATCH_SIZE)
