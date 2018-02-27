@@ -33,7 +33,7 @@ def RANDOM_ONE_HOT():
 
 
 def NN(x, reuse = False):
-    x = tf.layers.conv2d(x, filters=32, kernel_size=(7, 7), strides = 2, padding='same', activation=tf.nn.relu, name='conv2d_1', reuse=reuse)
+    x = tf.layers.conv2d(x, filters=32, kernel_size=(8, 8), strides = 2, padding='same', activation=tf.nn.relu, name='conv2d_1', reuse=reuse)
     x = tf.layers.conv2d(x, filters=64, kernel_size=(5, 5), strides = 2, padding='same', activation=tf.nn.relu, name='conv2d_2', reuse=reuse)
     x = tf.layers.conv2d(x, filters=64, kernel_size=(3, 3), strides = 1, padding='same', activation=tf.nn.relu, name='conv2d_5', reuse=reuse)
     x = tf.layers.flatten(x)
@@ -85,7 +85,7 @@ training_data = list()
 RANDOM_FACTOR=0
 
 temp = 0
-
+oldREWSUM = 0
 while (1):
         #print('playing')
         
@@ -140,12 +140,17 @@ while (1):
                 gameExit = True
 
         if time_step%5000 == 0:
-                line = str(time_step)+','+ str(LRewSUM)+','+ str(RRewSUM)+ ','+str(NUM_ROUNDS_PLAYED-temp)+';'
+                
+                line = str(time_step)+','+ str(LRewSUM)+','+ str(RRewSUM)+ ','+str(NUM_ROUNDS_PLAYED-temp)+','+str(Game.L_POINTS)+','+str(Game.R_POINTS)+';'
                 saver.save(session, './DQN_model', global_step = time_step)
                 rewards_array.append(LRewSUM)
+
                 print(line)
                 results_file.write(line)
                 temp = NUM_ROUNDS_PLAYED
+                LRewSUM = 0
+                RRewSUM = 0
+                
 
         #training time
         # only start training after at least 1000 things in QUE

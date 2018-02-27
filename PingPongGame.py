@@ -63,10 +63,10 @@ class PongGame:
     def Move(self, PADDLE_LEFT_ACTION, PADDLE_RIGHT_ACTION ):
         
         if np.argmax(PADDLE_RIGHT_ACTION)==np.argmax(UP):
-            self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y-self.PADDLE_SPEED
+            self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y-4
             
         elif np.argmax(PADDLE_RIGHT_ACTION)==np.argmax(DOWN):
-            self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y+self.PADDLE_SPEED
+            self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y+4
             
         elif np.argmax(PADDLE_RIGHT_ACTION)==np.argmax(DONT_MOVE):
             self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y
@@ -100,6 +100,7 @@ class PongGame:
         FLOOR_COLLISION = self.BALL_Y>(self.WIN_DIM-self.BALL_DIM)
         CEILING_COLLISION = self.BALL_Y<0
         if LEFT_COLLISION:
+            self.L_POINTS = self.L_POINTS+.1
             self.BALL_SPEED = self.BALL_SPEED + .1
             self.BALL_X = self.PADDLE_LEFT_X+self.PADDLE_W
             
@@ -111,7 +112,7 @@ class PongGame:
             #convert from [0,70] to [1.309,-1.309]
             G = BALL_PADDLE_LEFT_COORDINATE/70
             BALL_PADDLE_LEFT_COORDINATE = .8*(1-G)-.8*(G)
-        
+            
             self.BALL_V_X = self.BALL_SPEED*math.cos(BALL_PADDLE_LEFT_COORDINATE)
             self.BALL_V_Y = self.BALL_SPEED*-math.sin(BALL_PADDLE_LEFT_COORDINATE)
 
