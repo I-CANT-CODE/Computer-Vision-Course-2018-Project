@@ -2,21 +2,24 @@ import PingPongGame as PONG
 import numpy as np
 import math
 import random
-import ONE_HOT
-import NN
 import tensorflow as tf
 import pygame
+import matplotlib.pyplot as plt
 
 clock = pygame.time.Clock()
 
-results_file = open("./locational_Multiagent_results_file",'w')
+results_file = open("./DQN_REWARDS_OVER_TIME",'w')
 BATCH_SIZE = 32
 ALPHA = 1e-6
 GAMMA = .99
 EPSILON = .97
+rewards_array = list()
 
 LOAD_MODEL = False
-
+def GRAPH_REWARDS(REW_ARRAY):
+        plt.plot(REW_ARRAY)
+        plt.show()
+        
 def ONE_HOT_ACTIONS(array):
         maxI = np.argmax(array)
         new_array = [0,0,0]
@@ -30,25 +33,23 @@ def RANDOM_ONE_HOT():
 
 
 def NN(x, reuse = False):
+    x = tf.layers.conv2d(x, filters=32, kernel_size=(7, 7), strides = 2, padding='same', activation=tf.nn.relu, name='conv2d_1', reuse=reuse)
+    x = tf.layers.conv2d(x, filters=64, kernel_size=(5, 5), strides = 2, padding='same', activation=tf.nn.relu, name='conv2d_2', reuse=reuse)
+    x = tf.layers.conv2d(x, filters=64, kernel_size=(3, 3), strides = 1, padding='same', activation=tf.nn.relu, name='conv2d_5', reuse=reuse)
     x = tf.layers.flatten(x)
-    x = tf.layers.dense(x,units = 128,activation = tf.nn.relu,  name = 'FC1', reuse = reuse)
-    x = tf.layers.dense(x,units = 256,activation = tf.nn.relu, name = 'FC2', reuse = reuse)
-    x = tf.layers.dense(x,units = 512,activation = tf.nn.relu,  name = 'FC3', reuse = reuse)
-    x = tf.layers.dense(x,units = 512,activation = tf.nn.relu,  name = 'FC4', reuse = reuse)
-    x = tf.layers.dense(x,units = 256,activation = tf.nn.relu, name = 'FC5', reuse = reuse)
-    x = tf.layers.dense(x,units = 128,activation = tf.nn.relu, name = 'FC6', reuse = reuse)
+    x = tf.layers.dense(x,units = 512, activation = tf.nn.relu, name = 'fullyconected', reuse = reuse)
     Action_Vals = tf.layers.dense(x,units = 3, name = 'FC7', reuse = reuse)
     return Action_Vals
 
 #make 2 graphs
-State_InL = tf.placeholder(tf.float32, shape = [None, 4,4])
+State_InL = tf.placeholder(tf.float32, shape = [None, 2,64,64])
 with tf.variable_scope("paddleL"):
     Q_L = NN(State_InL, reuse = False)
-
-State_InR = tf.placeholder(tf.float32, shape = [None, 4,4])
+'''
+State_InR = tf.placeholder(tf.float32, shape = [None, 2,64,64])
 with tf.variable_scope("paddleR"):
     Q_R = NN(State_InR, reuse = False)
-
+'''
 
 #define loss function for left side player
 GT_L = tf.placeholder(tf.float32, shape = [BATCH_SIZE])
@@ -56,15 +57,16 @@ Action_Placeholder_L = tf.placeholder(tf.float32,shape = [BATCH_SIZE,3])
 approximation_L = tf.reduce_sum(tf.multiply(Action_Placeholder_L,Q_L),1)
 Loss_L = tf.reduce_mean(tf.square(GT_L-approximation_L))
 train_step_L = tf.train.AdamOptimizer(ALPHA).minimize(Loss_L)
-
+'''
 #then the right
 GT_R = tf.placeholder(tf.float32, shape = [BATCH_SIZE])
 Action_Placeholder_R = tf.placeholder(tf.float32,shape = [BATCH_SIZE,3])
 approximation_R = tf.reduce_sum(tf.multiply(Action_Placeholder_R,Q_R),1)
 Loss_R = tf.reduce_mean(tf.square(GT_R-approximation_R))
 train_step_R = tf.train.AdamOptimizer(ALPHA).minimize(Loss_R)
+'''
 
-Game = PONG.PongGame(320, "location")
+Game = PONG.PongGame(320, "pixels")
 saver = tf.train.Saver()
 session = tf.Session()
 session.run(tf.global_variables_initializer())
@@ -88,6 +90,7 @@ while (1):
         #print('playing')
         
         if np.random.binomial(1,EPSILON):
+                #print (np.shape(STATE))
                 AVL = session.run(Q_L, feed_dict = {State_InL: [STATE]})
                 AVL = ONE_HOT_ACTIONS(AVL)
                 
@@ -129,11 +132,17 @@ while (1):
         
         for event in pygame.event.get():
             #print(event)
+            if event.type == pygame.KEYDOWN:
+                if event.key ==pygame.K_DOWN:
+                    GRAPH_REWARDS(rewards_array)
+                    
             if event.type == pygame.QUIT:#for exiting the game
                 gameExit = True
 
         if time_step%5000 == 0:
                 line = str(time_step)+','+ str(LRewSUM)+','+ str(RRewSUM)+ ','+str(NUM_ROUNDS_PLAYED-temp)+';'
+                saver.save(session, './DQN_model', global_step = time_step)
+                rewards_array.append(LRewSUM)
                 print(line)
                 results_file.write(line)
                 temp = NUM_ROUNDS_PLAYED
@@ -145,14 +154,8 @@ while (1):
                 
         
         
-        if time_step>1000:
-                if (time_step%50==0):
-                        if (GAMMA <.98):
-                                GAMMA = GAMMA + .1
-                                if GAMMA>.99:
-                                        GAMMA = .99
-                
-                                
+        if (time_step>1000)&(time_step%4==0):
+                   
                 #train
                 batch = random.sample(training_data, BATCH_SIZE)
                 SO_ = [item[0] for item in batch]

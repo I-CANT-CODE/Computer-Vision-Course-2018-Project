@@ -22,7 +22,7 @@ class PongGame:
         self.PADDLE_H = 70
         self.BALL_DIM = 10
         self.MODE = Mode
-
+        self.screen_shot = []
         #PADDLE LEFT
         self.PADDLE_LEFT_X = 0
         self.PADDLE_LEFT_Y_INIT = self.WIN_DIM/2
@@ -43,8 +43,8 @@ class PongGame:
         self.BALL_V_Y = 2
 
         #SPEEDS
-        self.PADDLE_SPEED = 3
-        self.INIT_BALL_SPEED = 1
+        self.PADDLE_SPEED = 18
+        self.INIT_BALL_SPEED = 6
         self.BALL_SPEED = self.INIT_BALL_SPEED
         self.COLLISION_MARGIN = 10
         
@@ -57,7 +57,7 @@ class PongGame:
         self.R_REWARD_SIGNAL = 0
         
         self.frame_skipping = 4
-
+        self.buffer = list()
         self.RenderFrame()
 
     def Move(self, PADDLE_LEFT_ACTION, PADDLE_RIGHT_ACTION ):
@@ -169,6 +169,13 @@ class PongGame:
         pygame.draw.rect(Disp, white, [self.BALL_X,self.BALL_Y,self.BALL_DIM,self.BALL_DIM])#draw ball
         pygame.display.update()
 
+        if self.MODE == "pixels":
+        #get screen shot
+            self.screen_shot = pygame.surfarray.array3d(Disp)
+            self.screen_shot = self.screen_shot[1::5,1::5,:]
+            self.screen_shot = self.screen_shot[:,:,0]
+            self.screen_shot = np.divide(self.screen_shot,255)
+
     def Run4Frames(self, AL, AR):
         IPL = self.L_POINTS;
         IPR = self.R_POINTS;
@@ -178,7 +185,9 @@ class PongGame:
             paddle_L_tracking =[0,0,0,0]
             ball_x_tracking = [0,0,0,0]
             ball_y_tracking = [0,0,0,0]
-        
+        if self.MODE == "pixels":
+            self.buffer =list()
+            
         for i in range (self.frame_skipping):
             #clock.tick(60)
             self.Move(AL, AR)
@@ -191,8 +200,8 @@ class PongGame:
                 ball_y_tracking[i] = self.BALL_Y
                 
             if self.MODE == "pixels":
-                print ("pixels")
-                x = input()
+                self.buffer.append(self.screen_shot)
+                
             
         L_rew = (self.L_POINTS-IPL)-(self.R_POINTS-IPR)
         R_rew = (self.R_POINTS-IPR)-(self.L_POINTS-IPL)
@@ -201,7 +210,7 @@ class PongGame:
         if self.MODE == "location":
             return  L_rew,R_rew, [paddle_L_tracking,paddle_R_tracking,ball_x_tracking,ball_y_tracking]
         else:
-            return 1
+            return L_rew, R_rew, [self.buffer[0],self.buffer[3]]
     def QUITGAME(self):
         pygame.quit()
         quit()
