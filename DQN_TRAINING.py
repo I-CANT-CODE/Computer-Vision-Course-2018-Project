@@ -134,7 +134,7 @@ while (1):
                 LRewSUM = 0
                 RRewSUM = 0
                 
-        if time_step%100000:
+        if time_step%100000==0:
                 saver.save(session, './'+model_string, global_step = time_step)
                 
                 
@@ -143,6 +143,8 @@ while (1):
         # only start training after at least 1000 things in QUE
         if time_step>200000:
                 training_data.pop(0)
+        if time_step == 500000:
+                Game.QUITGAME()
                 
         
         
