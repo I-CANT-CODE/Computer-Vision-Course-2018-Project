@@ -9,6 +9,6 @@ while (1):
         L,R, DATA = Game.Run4Frames([1,0,0],[0,0,1])
         print (L,R)
         print(np.shape(DATA))
-        plt.imshow(DATA[0]-DATA[1])
+        plt.imshow(DATA[0])
         plt.show()
 

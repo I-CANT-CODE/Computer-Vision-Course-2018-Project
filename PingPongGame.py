@@ -43,7 +43,7 @@ class PongGame:
         self.BALL_V_Y = 2
 
         #SPEEDS
-        self.PADDLE_SPEED = 18
+        self.PADDLE_SPEED_L=self.PADDLE_SPEED_R = 18
         self.INIT_BALL_SPEED = 6
         self.BALL_SPEED = self.INIT_BALL_SPEED
         self.COLLISION_MARGIN = 10
@@ -63,19 +63,19 @@ class PongGame:
     def Move(self, PADDLE_LEFT_ACTION, PADDLE_RIGHT_ACTION ):
         
         if np.argmax(PADDLE_RIGHT_ACTION)==np.argmax(UP):
-            self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y-4
+            self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y-self.PADDLE_SPEED_R
             
         elif np.argmax(PADDLE_RIGHT_ACTION)==np.argmax(DOWN):
-            self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y+4
+            self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y+self.PADDLE_SPEED_R
             
         elif np.argmax(PADDLE_RIGHT_ACTION)==np.argmax(DONT_MOVE):
             self.PADDLE_RIGHT_Y = self.PADDLE_RIGHT_Y
             
         if np.argmax(PADDLE_LEFT_ACTION)==np.argmax(UP):
-            self.PADDLE_LEFT_Y = self.PADDLE_LEFT_Y-self.PADDLE_SPEED
+            self.PADDLE_LEFT_Y = self.PADDLE_LEFT_Y-self.PADDLE_SPEED_L
             
         elif np.argmax(PADDLE_LEFT_ACTION)==np.argmax(DOWN):
-            self.PADDLE_LEFT_Y = self.PADDLE_LEFT_Y+self.PADDLE_SPEED
+            self.PADDLE_LEFT_Y = self.PADDLE_LEFT_Y+self.PADDLE_SPEED_L
             
         elif np.argmax(PADDLE_LEFT_ACTION)==np.argmax(DONT_MOVE):
             self.PADDLE_LEFT_Y = self.PADDLE_LEFT_Y
@@ -211,7 +211,7 @@ class PongGame:
         if self.MODE == "location":
             return  L_rew,R_rew, [paddle_L_tracking,paddle_R_tracking,ball_x_tracking,ball_y_tracking]
         else:
-            return L_rew, R_rew, [self.buffer[0],self.buffer[3]]
+            return L_rew, R_rew, [self.buffer[3]-.5*self.buffer[0]]
     def QUITGAME(self):
         pygame.quit()
         quit()

@@ -10,7 +10,7 @@ clock = pygame.time.Clock()
 
 results_file = open("./DQN_REWARDS_OVER_TIME",'w')
 BATCH_SIZE = 32
-ALPHA = 1e-6
+ALPHA = 1e-4
 GAMMA = .99
 EPSILON = .97
 rewards_array = list()
@@ -42,14 +42,9 @@ def NN(x, reuse = False):
     return Action_Vals
 
 #make 2 graphs
-State_InL = tf.placeholder(tf.float32, shape = [None, 2,64,64])
+State_InL = tf.placeholder(tf.float32, shape = [None, 1,64,64])
 with tf.variable_scope("paddleL"):
     Q_L = NN(State_InL, reuse = False)
-'''
-State_InR = tf.placeholder(tf.float32, shape = [None, 2,64,64])
-with tf.variable_scope("paddleR"):
-    Q_R = NN(State_InR, reuse = False)
-'''
 
 #define loss function for left side player
 GT_L = tf.placeholder(tf.float32, shape = [BATCH_SIZE])
@@ -57,16 +52,9 @@ Action_Placeholder_L = tf.placeholder(tf.float32,shape = [BATCH_SIZE,3])
 approximation_L = tf.reduce_sum(tf.multiply(Action_Placeholder_L,Q_L),1)
 Loss_L = tf.reduce_mean(tf.square(GT_L-approximation_L))
 train_step_L = tf.train.AdamOptimizer(ALPHA).minimize(Loss_L)
-'''
-#then the right
-GT_R = tf.placeholder(tf.float32, shape = [BATCH_SIZE])
-Action_Placeholder_R = tf.placeholder(tf.float32,shape = [BATCH_SIZE,3])
-approximation_R = tf.reduce_sum(tf.multiply(Action_Placeholder_R,Q_R),1)
-Loss_R = tf.reduce_mean(tf.square(GT_R-approximation_R))
-train_step_R = tf.train.AdamOptimizer(ALPHA).minimize(Loss_R)
-'''
 
 Game = PONG.PongGame(320, "pixels")
+Game.PADDLE_SPEED_R = 4
 saver = tf.train.Saver()
 session = tf.Session()
 session.run(tf.global_variables_initializer())
@@ -93,7 +81,6 @@ while (1):
                 #print (np.shape(STATE))
                 AVL = session.run(Q_L, feed_dict = {State_InL: [STATE]})
                 AVL = ONE_HOT_ACTIONS(AVL)
-                
         else:
                 AVL = RANDOM_ONE_HOT()
 
@@ -108,12 +95,6 @@ while (1):
         else:
                 AVR=[1,0,0]
 #----------------------------------------------------------------------------------------------------------
-
-        '''if np.random.binomial(1,EPSILON):
-                AVR = session.run(Q_R, feed_dict = {State_InR: [STATE]})
-                AVR = ONE_HOT_ACTIONS(AVR)
-        else:
-                AVR = RANDOM_ONE_HOT()'''
         
         OLD_STATE=np.copy(STATE)
         L,R, STATE = Game.Run4Frames(AVL,AVR)
@@ -154,12 +135,13 @@ while (1):
 
         #training time
         # only start training after at least 1000 things in QUE
-        if time_step>100000:
+        if time_step>1000000:
                 training_data.pop(0)
                 
         
         
         if (time_step>1000)&(time_step%4==0):
+                print(training)
                    
                 #train
                 batch = random.sample(training_data, BATCH_SIZE)
@@ -188,22 +170,5 @@ while (1):
                 #x = input()
                 #print(np.shape(target_),np.shape(AL_))
                 session.run(train_step_L, feed_dict = {GT_L:target_F, Action_Placeholder_L:AL_, State_InL:SO_})
-                '''
-                batch = random.sample(training_data, BATCH_SIZE)
-                SO_ = [item[0] for item in batch]
-                RL_ = [item[1] for item in batch]
-                RR_ = [item[2] for item in batch]
-                AL_ = [item[3] for item in batch]
-                AR_ = [item[4] for item in batch]
-                SN_ = [item[5] for item in batch]           
-                #TRAIN RIGHT SIDE
-                target = session.run(Q_R,feed_dict = {State_InR:SN_})#get q values of next state (Q')
-                target_ = [None]*len(batch)
-                for i in range(len(batch)):
-                        target_[i] = max(target[i])#get max values of Q' values of next state                        
-                target_ = [i*GAMMA for i in target_]#discount future rewards of Q'
-                target_F = [j+i for i,j in zip(RR_,target_)]#now we have our target value of r + max(Q')
-                session.run(train_step_R, feed_dict = {GT_R:target_F, Action_Placeholder_R:AR_, State_InR:SO_})
-        '''
         
 
