@@ -100,7 +100,7 @@ class PongGame:
         FLOOR_COLLISION = self.BALL_Y>(self.WIN_DIM-self.BALL_DIM)
         CEILING_COLLISION = self.BALL_Y<0
         if LEFT_COLLISION:
-            self.L_POINTS = self.L_POINTS+.1
+            #self.L_POINTS = self.L_POINTS+.1
             self.BALL_SPEED = self.BALL_SPEED + .1
             self.BALL_X = self.PADDLE_LEFT_X+self.PADDLE_W
             

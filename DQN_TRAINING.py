@@ -135,7 +135,7 @@ while (1):
 
         #training time
         # only start training after at least 1000 things in QUE
-        if time_step>1000000:
+        if time_step>200000:
                 training_data.pop(0)
                 
         
