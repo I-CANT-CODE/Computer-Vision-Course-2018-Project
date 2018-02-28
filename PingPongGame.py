@@ -93,8 +93,8 @@ class PongGame:
             self.PADDLE_LEFT_Y = -.5*self.PADDLE_H
 
     def CheckCollisions(self):
-        LEFT_COLLISION = (self.BALL_X<(self.PADDLE_LEFT_X+self.PADDLE_W))&(self.BALL_X>self.PADDLE_LEFT_X)&((self.BALL_Y+self.BALL_DIM)>self.PADDLE_LEFT_Y)&(self.BALL_Y<(self.PADDLE_LEFT_Y+self.PADDLE_H))
-        RIGHT_COLLISION = (self.BALL_X>(self.PADDLE_RIGHT_X-self.BALL_DIM))&(self.BALL_X<(self.PADDLE_RIGHT_X+self.PADDLE_W))&((self.BALL_Y+self.BALL_DIM)>self.PADDLE_RIGHT_Y)&(self.BALL_Y<(self.PADDLE_RIGHT_Y+self.PADDLE_H))
+        LEFT_COLLISION = (self.BALL_X<(self.PADDLE_LEFT_X+self.PADDLE_W))&(self.BALL_X>self.PADDLE_LEFT_X)&((self.BALL_Y+self.BALL_DIM)>(self.PADDLE_LEFT_Y-3))&(self.BALL_Y<(self.PADDLE_LEFT_Y+self.PADDLE_H+3))
+        RIGHT_COLLISION= (self.BALL_X>(self.PADDLE_RIGHT_X-self.BALL_DIM))&(self.BALL_X<(self.PADDLE_RIGHT_X+self.PADDLE_W))&((self.BALL_Y+self.BALL_DIM)>self.PADDLE_RIGHT_Y)&(self.BALL_Y<(self.PADDLE_RIGHT_Y+self.PADDLE_H))
         LEFT_PADDLE_FAIL = self.BALL_X+self.BALL_DIM<=0
         RIGHT_PADDLE_FAIL = self.BALL_X> self.WIN_DIM
         FLOOR_COLLISION = self.BALL_Y>(self.WIN_DIM-self.BALL_DIM)
