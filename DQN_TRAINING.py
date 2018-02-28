@@ -144,6 +144,7 @@ while (1):
         if time_step>200000:
                 training_data.pop(0)
         if time_step == 500000:
+                results_file.close()
                 Game.QUITGAME()
                 
         
