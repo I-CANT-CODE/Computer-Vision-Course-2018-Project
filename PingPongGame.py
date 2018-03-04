@@ -19,7 +19,7 @@ class PongGame:
     def __init__(self, W_H, Mode):
         self.WIN_DIM = W_H
         self.PADDLE_W = 20
-        self.PADDLE_H = 70
+        self.PADDLE_H = 50
         self.BALL_DIM = 10
         self.MODE = Mode
         self.screen_shot = []
@@ -83,17 +83,18 @@ class PongGame:
         self.BALL_X = self.BALL_X + self.BALL_V_X
         self.BALL_Y = self.BALL_Y + self.BALL_V_Y
 
-        if self.PADDLE_RIGHT_Y >= self.WIN_DIM-self.PADDLE_H+.5*self.PADDLE_H:
-            self.PADDLE_RIGHT_Y = self.WIN_DIM-self.PADDLE_H+.5*self.PADDLE_H
-        if self.PADDLE_RIGHT_Y <= -.5*self.PADDLE_H:
-            self.PADDLE_RIGHT_Y = -.5*self.PADDLE_H
-        if self.PADDLE_LEFT_Y >= self.WIN_DIM-self.PADDLE_H/2:
-            self.PADDLE_LEFT_Y = self.WIN_DIM-self.PADDLE_H/2
-        if self.PADDLE_LEFT_Y <= -.5*self.PADDLE_H:
-            self.PADDLE_LEFT_Y = -.5*self.PADDLE_H
+        if self.PADDLE_RIGHT_Y >= self.WIN_DIM-self.PADDLE_H:
+            self.PADDLE_RIGHT_Y = self.WIN_DIM-self.PADDLE_H
+        if self.PADDLE_RIGHT_Y <= 0:
+            self.PADDLE_RIGHT_Y = 0
+            
+        if self.PADDLE_LEFT_Y >= self.WIN_DIM-self.PADDLE_H:
+            self.PADDLE_LEFT_Y = self.WIN_DIM-self.PADDLE_H
+        if self.PADDLE_LEFT_Y <= 0:
+            self.PADDLE_LEFT_Y = 0
 
     def CheckCollisions(self):
-        LEFT_COLLISION = (self.BALL_X<(self.PADDLE_LEFT_X+self.PADDLE_W))&(self.BALL_X>self.PADDLE_LEFT_X)&((self.BALL_Y+self.BALL_DIM)>(self.PADDLE_LEFT_Y-3))&(self.BALL_Y<(self.PADDLE_LEFT_Y+self.PADDLE_H+3))
+        LEFT_COLLISION = (self.BALL_X<(self.PADDLE_LEFT_X+self.PADDLE_W))&(self.BALL_X>self.PADDLE_LEFT_X)&((self.BALL_Y+self.BALL_DIM)>(self.PADDLE_LEFT_Y))&(self.BALL_Y<(self.PADDLE_LEFT_Y+self.PADDLE_H))
         RIGHT_COLLISION= (self.BALL_X>(self.PADDLE_RIGHT_X-self.BALL_DIM))&(self.BALL_X<(self.PADDLE_RIGHT_X+self.PADDLE_W))&((self.BALL_Y+self.BALL_DIM)>self.PADDLE_RIGHT_Y)&(self.BALL_Y<(self.PADDLE_RIGHT_Y+self.PADDLE_H))
         LEFT_PADDLE_FAIL = self.BALL_X+self.BALL_DIM<=0
         RIGHT_PADDLE_FAIL = self.BALL_X> self.WIN_DIM
@@ -110,7 +111,7 @@ class PongGame:
             if BALL_PADDLE_LEFT_COORDINATE > self.PADDLE_H:
                 BALL_PADDLE_LEFT_COORDINATE = self.PADDLE_H
             #convert from [0,70] to [1.309,-1.309]
-            G = BALL_PADDLE_LEFT_COORDINATE/70
+            G = BALL_PADDLE_LEFT_COORDINATE/self.PADDLE_H 
             BALL_PADDLE_LEFT_COORDINATE = .8*(1-G)-.8*(G)
             
             self.BALL_V_X = self.BALL_SPEED*math.cos(BALL_PADDLE_LEFT_COORDINATE)
@@ -126,7 +127,7 @@ class PongGame:
             if BALL_PADDLE_RIGHT_COORDINATE > self.PADDLE_H:
                 BALL_PADDLE_RIGHT_COORDINATE = self.PADDLE_H
             #convert from [0,70] to [1.8326,4.45059]
-            G = BALL_PADDLE_RIGHT_COORDINATE/70
+            G = BALL_PADDLE_RIGHT_COORDINATE/self.PADDLE_H 
             BALL_PADDLE_RIGHT_COORDINATE = .8*(1-G)-.8*(G)
 
             

@@ -7,7 +7,7 @@ import pygame
 import matplotlib.pyplot as plt
 
 clock = pygame.time.Clock()
-fstring = input("enter a name for the reward data file:")
+fstring = "DQN_RIGHT_REWARDS"
 results_file = open("./"+fstring,'w')
 BATCH_SIZE = 32
 ALPHA = 1e-4
@@ -42,24 +42,24 @@ def NN(x, reuse = False):
     return Action_Vals
 
 #make 2 graphs
-State_InL = tf.placeholder(tf.float32, shape = [None, 1,64,64])
-with tf.variable_scope("paddleL"):
-    Q_L = NN(State_InL, reuse = False)
+State_InR = tf.placeholder(tf.float32, shape = [None, 1,64,64])
+with tf.variable_scope("paddleR"):
+    Q_R = NN(State_InR, reuse = False)
 
 #define loss function for left side player
-GT_L = tf.placeholder(tf.float32, shape = [BATCH_SIZE])
-Action_Placeholder_L = tf.placeholder(tf.float32,shape = [BATCH_SIZE,3])
-approximation_L = tf.reduce_sum(tf.multiply(Action_Placeholder_L,Q_L),1)
-Loss_L = tf.reduce_mean(tf.square(GT_L-approximation_L))
-train_step_L = tf.train.AdamOptimizer(ALPHA).minimize(Loss_L)
+GT_R = tf.placeholder(tf.float32, shape = [BATCH_SIZE])
+Action_Placeholder_R = tf.placeholder(tf.float32,shape = [BATCH_SIZE,3])
+approximation_R = tf.reduce_sum(tf.multiply(Action_Placeholder_R,Q_R),1)
+Loss_R = tf.reduce_mean(tf.square(GT_R-approximation_R))
+train_step_R = tf.train.AdamOptimizer(ALPHA).minimize(Loss_R)
 
 Game = PONG.PongGame(320, "pixels")
-Game.PADDLE_SPEED_R = 4
+Game.PADDLE_SPEED_L = 4
 saver = tf.train.Saver()
 session = tf.Session()
 session.run(tf.global_variables_initializer())
 
-model_string = input("enter a name for the Model checkpoint files:")
+model_string = "DQN_RIGHT_MODEL"
 print("press down key at any time to check reward progress on graph")
 
 
@@ -82,10 +82,10 @@ while (1):
         
         if np.random.binomial(1,EPSILON):
                 #print (np.shape(STATE))
-                AVL = session.run(Q_L, feed_dict = {State_InL: [STATE]})
-                AVL = ONE_HOT_ACTIONS(AVL)
+                AVR = session.run(Q_R, feed_dict = {State_InR: [STATE]})
+                AVR = ONE_HOT_ACTIONS(AVR)
         else:
-                AVL = RANDOM_ONE_HOT()
+                AVR = RANDOM_ONE_HOT()
 
 #here I model the built in player:------------------------------------------------------------------------
         
@@ -93,10 +93,10 @@ while (1):
                 RANDOM_FACTOR=random.randint(-35,35)
                 #print(RANDOM_FACTOR)
                 
-        if Game.BALL_Y+Game.BALL_DIM/2 > Game.PADDLE_RIGHT_Y+35+RANDOM_FACTOR:
-                AVR=[0,0,1]
+        if Game.BALL_Y+Game.BALL_DIM/2 > Game.PADDLE_LEFT_Y+35+RANDOM_FACTOR:
+                AVL=[0,0,1]
         else:
-                AVR=[1,0,0]
+                AVL=[1,0,0]
 #----------------------------------------------------------------------------------------------------------
         
         OLD_STATE=np.copy(STATE)
@@ -126,8 +126,8 @@ while (1):
                 
 
         if time_step%5000 == 0:
-                line = str(time_step)+','+ str(LRewSUM)+';'
-                rewards_array.append(LRewSUM)
+                line = str(time_step)+','+ str(RRewSUM)+';'
+                rewards_array.append(RRewSUM)
                 print(line)
                 results_file.write(line)
                 temp = NUM_ROUNDS_PLAYED
@@ -164,7 +164,7 @@ while (1):
 
                 #x = input()
                 #TRAIN LEFT SIDE FIRST
-                target = session.run(Q_L,feed_dict = {State_InL:SN_})#get q values of next state (Q')
+                target = session.run(Q_R,feed_dict = {State_InR:SN_})#get q values of next state (Q')
                 #print(target)
                 target_ = [None]*len(batch)
                 #print(target_)
@@ -173,11 +173,11 @@ while (1):
                 #print(target_)
                 target_ = [i*GAMMA for i in target_]#discount future rewards of Q'
                 #print("target * GAMMA ",target_)
-                target_F = [j+i for i,j in zip(RL_,target_)]#now we have our target value of r + max(Q')
+                target_F = [j+i for i,j in zip(RR_,target_)]#now we have our target value of r + max(Q')
                 #print(target_F)
                 #[print(i-j) for i,j in zip(target_F,target_)]
                 #x = input()
                 #print(np.shape(target_),np.shape(AL_))
-                session.run(train_step_L, feed_dict = {GT_L:target_F, Action_Placeholder_L:AL_, State_InL:SO_})
+                session.run(train_step_R, feed_dict = {GT_R:target_F, Action_Placeholder_R:AR_, State_InR:SO_})
         
 
