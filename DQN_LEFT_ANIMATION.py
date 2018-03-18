@@ -46,14 +46,15 @@ def NN(x, reuse = False):
     return Action_Vals
 
 session = tf.Session()
-session.run(tf.global_variables_initializer())
+
 
 State_InL = tf.placeholder(tf.float32, shape = [None, 1,64,64])
 with tf.variable_scope("paddleL"):
     Q_L = NN(State_InL, reuse = False)
-saver1 = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='paddleL'))
-saver1.restore(session, MODEL_L_STR)
+#saver1 = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='paddleL'))
+#saver1.restore(session, MODEL_L_STR)
 
+session.run(tf.global_variables_initializer())
 
 Game = PONG.PongGame(320, "pixels")
 
@@ -73,7 +74,7 @@ RANDOM_FACTOR=0
 temp = 0
 oldREWSUM = 0
 while (1):
-        clock.tick(30)
+        clock.tick(10)
         for event in pygame.event.get():
             #print(event)
                     
