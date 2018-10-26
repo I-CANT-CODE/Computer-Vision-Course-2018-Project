@@ -5,6 +5,7 @@ import random
 import tensorflow as tf
 import pygame
 import matplotlib.pyplot as plt
+import MyFunctions
 
 clock = pygame.time.Clock()
 fstring = "DUELING_DQN_RIGHT_REWARDS"

@@ -5,6 +5,7 @@ import random
 import tensorflow as tf
 import pygame
 import matplotlib.pyplot as plt
+import MyFunctions
 
 clock = pygame.time.Clock()
 fstring = input("enter a name for the reward data file:")
