@@ -6,6 +6,7 @@ import tensorflow as tf
 import pygame
 import matplotlib.pyplot as plt
 config=tf.ConfigProto(device_count={'GPU': 0})
+import MyFunctions
 
 a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
 b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
@@ -25,35 +26,12 @@ EPSILON = .97
 rewards_array = list()
 
 LOAD_MODEL = False
-def GRAPH_REWARDS(REW_ARRAY):
-        plt.plot(REW_ARRAY)
-        plt.show()
-        
-def ONE_HOT_ACTIONS(array):
-        maxI = np.argmax(array)
-        new_array = [0,0,0]
-        new_array[maxI] = 1
-        return new_array
 
-def RANDOM_ONE_HOT():
-        new_array = [0,0,0]
-        new_array[random.randint(0,2)] = 1
-        return new_array
-
-
-def NN(x, reuse = False):
-    x = tf.layers.conv2d(x, filters=32, kernel_size=(8, 8), strides = 2, padding='same', activation=tf.nn.relu, name='conv2d_1', reuse=reuse)
-    x = tf.layers.conv2d(x, filters=64, kernel_size=(5, 5), strides = 2, padding='same', activation=tf.nn.relu, name='conv2d_2', reuse=reuse)
-    x = tf.layers.conv2d(x, filters=64, kernel_size=(3, 3), strides = 1, padding='same', activation=tf.nn.relu, name='conv2d_5', reuse=reuse)
-    x = tf.layers.flatten(x)
-    x = tf.layers.dense(x,units = 512, activation = tf.nn.relu, name = 'fullyconected', reuse = reuse)
-    Action_Vals = tf.layers.dense(x,units = 3, name = 'FC7', reuse = reuse)
-    return Action_Vals
 
 #make 2 graphs
 State_InR = tf.placeholder(tf.float32, shape = [None, 1,64,64])
 with tf.variable_scope("paddleR"):
-    Q_R = NN(State_InR, reuse = False)
+    Q_R = MyFunctions.DQN(State_InR, reuse = False)
 
 #define loss function for left side player
 GT_R = tf.placeholder(tf.float32, shape = [BATCH_SIZE])
@@ -93,14 +71,14 @@ while (1):
         if np.random.binomial(1,EPSILON):
                 #print (np.shape(STATE))
                 AVR = session.run(Q_R, feed_dict = {State_InR: [STATE]})
-                AVR = ONE_HOT_ACTIONS(AVR)
+                AVR = MyFunctions.ONE_HOT_ACTIONS(AVR)
         else:
-                AVR = RANDOM_ONE_HOT()
+                AVR = MyFunctions.RANDOM_ONE_HOT()
 
 #here I model the built in player:------------------------------------------------------------------------
         
         if time_step%25 ==0:
-                RANDOM_FACTOR=random.randint(-35,35)
+                MyFunctions.RANDOM_FACTOR=random.randint(-35,35)
                 #print(RANDOM_FACTOR)
                 
         if Game.BALL_Y+Game.BALL_DIM/2 > Game.PADDLE_LEFT_Y+35+RANDOM_FACTOR:
@@ -128,7 +106,7 @@ while (1):
             #print(event)
             if event.type == pygame.KEYDOWN:
                 if event.key ==pygame.K_DOWN:
-                    GRAPH_REWARDS(rewards_array)
+                    MyFunctions.GRAPH_REWARDS(rewards_array)
                     
             if event.type == pygame.QUIT:#for exiting the game
                 results_file.close()

@@ -5,6 +5,7 @@ import random
 import tensorflow as tf
 import pygame
 import matplotlib.pyplot as plt
+import MyFunctions
 
 clock = pygame.time.Clock()
 fstring = input("enter a name for the reward data file:")
@@ -20,43 +21,19 @@ MODEL_R_STR = input ("enter the name of a model (right side player)")
 
 LOAD_MODEL = False
 
-def GRAPH_REWARDS(REW_ARRAY):
-        plt.plot(REW_ARRAY)
-        plt.show()
-        
-def ONE_HOT_ACTIONS(array):
-        maxI = np.argmax(array)
-        new_array = [0,0,0]
-        new_array[maxI] = 1
-        return new_array
-
-def RANDOM_ONE_HOT():
-        new_array = [0,0,0]
-        new_array[random.randint(0,2)] = 1
-        return new_array
-
-
-def NN(x, reuse = False):
-    x = tf.layers.conv2d(x, filters=32, kernel_size=(8, 8), strides = 2, padding='same', activation=tf.nn.relu, name='conv2d_1', reuse=reuse)
-    x = tf.layers.conv2d(x, filters=64, kernel_size=(5, 5), strides = 2, padding='same', activation=tf.nn.relu, name='conv2d_2', reuse=reuse)
-    x = tf.layers.conv2d(x, filters=64, kernel_size=(3, 3), strides = 1, padding='same', activation=tf.nn.relu, name='conv2d_5', reuse=reuse)
-    x = tf.layers.flatten(x)
-    x = tf.layers.dense(x,units = 512, activation = tf.nn.relu, name = 'fullyconected', reuse = reuse)
-    Action_Vals = tf.layers.dense(x,units = 3, name = 'FC7', reuse = reuse)
-    return Action_Vals
 
 session = tf.Session()
 session.run(tf.global_variables_initializer())
 
 State_InL = tf.placeholder(tf.float32, shape = [None, 1,64,64])
 with tf.variable_scope("paddleL"):
-    Q_L = NN(State_InL, reuse = False)
+    Q_L = MyFunctions.DQN(State_InL, reuse = False)
 saver1 = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='paddleL'))
 saver1.restore(session, MODEL_L_STR)
 
 State_InR = tf.placeholder(tf.float32, shape = [None, 1,64,64])
 with tf.variable_scope("paddleR"):
-    Q_R = NN(State_InR, reuse = False)
+    Q_R = MyFunctions.DQN(State_InR, reuse = False)
 saver2 = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='paddleR'))
 saver2.restore(session, MODEL_R_STR) 
 
@@ -87,10 +64,10 @@ while (1):
                     Game.QUITGAME()
         
         AVR = session.run(Q_R, feed_dict = {State_InR: [STATE]})
-        AVR = ONE_HOT_ACTIONS(AVR)
+        AVR = MyFunctions.ONE_HOT_ACTIONS(AVR)
         
         AVL = session.run(Q_L, feed_dict = {State_InL: [STATE]})
-        AVL = ONE_HOT_ACTIONS(AVL)
+        AVL = MyFunctions.ONE_HOT_ACTIONS(AVL)
         
         L,R, STATE = Game.Run4Frames(AVL,AVR)
         LRewSUM = L+LRewSUM

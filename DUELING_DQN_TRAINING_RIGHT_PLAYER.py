@@ -131,7 +131,7 @@ while (1):
             #print(event)
             if event.type == pygame.KEYDOWN:
                 if event.key ==pygame.K_DOWN:
-                    GRAPH_REWARDS(rewards_array)
+                    MyFunction.GRAPH_REWARDS_1(rewards_array)
                     
             if event.type == pygame.QUIT:#for exiting the game
                 results_file.close()
