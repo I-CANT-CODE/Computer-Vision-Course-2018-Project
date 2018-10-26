@@ -1,0 +1,20 @@
+Some Basic instructions for how to use these scripts:
+
+Experiment 1:
+
+Wanted to show that training against a multiagent is beneficial vs training against the hard coded player based on if statements
+
+- DQN_TRAINING_LEFT_PLAYER & DQN_TRAINING_RIGHT_PLAYER train Basic DQN RL Models against a hard coded players
+- DQN_MULTIAGENT_TRAINING_NORMAL trains two Basic DQN Models against eachother
+- DQN_MULTIAGENT_ASSESMENT Loads in any Two DQN Models by name and has them compete in games of pong and records the scores
+- Recommended: run these programs in the above order, and then load in the models in the assesment program to see how they do.
+
+Experiament 2:
+
+Wanted to see how the Dueling DQN architecture does against the classic DQN architecture
+
+- this is done by running DQN_MULTI_AGENT_TRAINING_MULTIPLE_ARCHITECTURES and observing rewards over time
+
+
+
+**for all programs you can graph the rewards over time while the program is running by hitting the down key
