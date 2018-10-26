@@ -77,9 +77,7 @@ session.run(tf.global_variables_initializer())
 
 State_InL = tf.placeholder(tf.float32, shape = [None, 1,64,64])
 with tf.variable_scope("paddleL"):
-    Q_L = DUELING_DQN(State_InL, reuse = False)
-
-
+    Q_L = DQN(State_InL, reuse = False)
 
 State_InR = tf.placeholder(tf.float32, shape = [None, 1,64,64])
 with tf.variable_scope("paddleR"):
@@ -127,7 +125,7 @@ temp = 0
 oldREWSUM = 0
 
 while (1):
-        
+        clock.tick(60)
         for event in pygame.event.get():
             #print(event)
                     
@@ -175,7 +173,7 @@ while (1):
                 LRewSUM = 0
                 RRewSUM = 0
 
-        if (time_step%50000==0):
+        if (time_step%50000==0)&(time_step<250000):
                 saver.save(session, './'+model_string, global_step = time_step)
                 
         if time_step>200000:

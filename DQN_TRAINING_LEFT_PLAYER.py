@@ -178,6 +178,7 @@ while (1):
                 #[print(i-j) for i,j in zip(target_F,target_)]
                 #x = input()
                 #print(np.shape(target_),np.shape(AL_))
+                print("here?????")
                 session.run(train_step_L, feed_dict = {GT_L:target_F, Action_Placeholder_L:AL_, State_InL:SO_})
-        
+                print("yueah")
 
